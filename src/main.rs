@@ -41,10 +41,17 @@ async fn sensors_handler(Json(payload): Json<SensorData>) -> impl IntoResponse {
 
 #[tokio::main]
 async fn main() {
+    dotenv::dotenv().ok();
+
+    let port = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse::<u16>()
+        .expect("PORT must be a valid u16 number");
+
     let app = Router::new()
         .route("/sensors", post(sensors_handler));
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 9005));
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("Listening on {}", addr);
     axum::serve(
         tokio::net::TcpListener::bind(addr).await.unwrap(),
